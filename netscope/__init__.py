@@ -1,3 +1,4 @@
-"""NetScope Phase 1 scanning foundation."""
+"""NetScope Phase 2 local implementation."""
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
+

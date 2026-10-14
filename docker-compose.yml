@@ -1,0 +1,15 @@
+services:
+  netscope:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - netscope-data:/app/.netscope
+      - netscope-db:/app/netscope.db
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+volumes:
+  netscope-data:
+  netscope-db:
+

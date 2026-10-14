@@ -1,16 +1,10 @@
-[build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "netscope"
-version = "0.1.0"
-description = "Authorized network discovery and service inventory toolkit"
+version = "0.2.0"
+description = "Authorized network discovery and vulnerability intelligence toolkit"
 requires-python = ">=3.9"
 dependencies = []
 
 [project.scripts]
 netscope = "netscope.cli:main"
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
