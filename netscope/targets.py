@@ -10,25 +10,33 @@ class TargetValidationError(ValueError):
 
 @dataclass(frozen=True)
 class TargetPolicy:
+    """Safety policy for authorized scan targets."""
+
     max_addresses: int = 4096
     allowlist: tuple[ipaddress._BaseNetwork, ...] = ()
 
-    def validate(self, target: str):
+    def validate(self, target: str) -> ipaddress._BaseNetwork | ipaddress._BaseAddress:
         try:
             value = ipaddress.ip_network(target, strict=False) if "/" in target else ipaddress.ip_address(target)
         except ValueError as exc:
             raise TargetValidationError(f"Invalid IP or CIDR target: {target}") from exc
-        size = getattr(value, "num_addresses", 1)
+
+        size = value.num_addresses if hasattr(value, "num_addresses") else 1
         if size > self.max_addresses:
-            raise TargetValidationError(f"Target contains {size} addresses; maximum is {self.max_addresses}")
+            raise TargetValidationError(
+                f"Target contains {size} addresses; maximum allowed is {self.max_addresses}"
+            )
         if self.allowlist and not any(
-            value.subnet_of(network) if hasattr(value, "subnet_of") else value in network
-            for network in self.allowlist
+            value.subnet_of(allowed) if hasattr(value, "subnet_of") else value in allowed
+            for allowed in self.allowlist
         ):
             raise TargetValidationError(f"Target is outside the configured allowlist: {target}")
         return value
 
 
-def parse_allowlist(values: list[str]):
-    return tuple(ipaddress.ip_network(value, strict=False) for value in values)
-
+def parse_allowlist(values: list[str]) -> tuple[ipaddress._BaseNetwork, ...]:
+    networks: list[ipaddress._BaseNetwork] = []
+    for value in values:
+        parsed = ipaddress.ip_network(value, strict=False)
+        networks.append(parsed)
+    return tuple(networks)

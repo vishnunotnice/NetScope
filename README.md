@@ -1,83 +1,37 @@
 # NetScope
 
-NetScope is an authorized network discovery, asset inventory, vulnerability intelligence, risk scoring, and topology platform.
+NetScope is an authorized network discovery and asset-inventory tool.
 
-## Quick start on macOS
+## Phase 1
 
-```bash
-brew install nmap
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .
-```
+- Host discovery with Nmap
+- Quick, service, full-TCP, and OS-detection profiles
+- Hostnames, MAC addresses, vendors, ports, services, products, versions, and CPEs
+- Optional OS fingerprinting with accuracy and evidence
+- IP/CIDR validation, configurable address limits, and optional allowlists
+- Argument-safe Nmap execution (no shell interpolation)
+- JSON output for automation
 
-Only scan IPs and networks for which you have explicit authorization.
+Only scan systems and ranges for which you have explicit authorization.
 
-## Scanning
+## Local usage
 
-```bash
-# Discover live hosts
-python3 -m netscope.cli scan 192.168.1.0/24 --profile discovery --output scan.json
-
-# Quick service scan
-python3 -m netscope.cli scan 192.168.1.0/24 --profile quick --output scan.json
-
-# Services on ports 1–1024
-python3 -m netscope.cli scan 192.168.1.0/24 --profile service --output scan.json
-
-# Full TCP port scan
-python3 -m netscope.cli scan 192.168.1.0/24 --profile full --output scan.json
-
-# OS and service detection
-python3 -m netscope.cli scan 192.168.1.10 --profile os --output scan.json
-```
-
-Use `--allow 192.168.1.0/24` to enforce an allowlist and `--max-addresses` to bound CIDR size.
-
-## Inventory, topology, and risk
+Install the package in editable mode:
 
 ```bash
-python3 -m netscope.cli inventory scan.json --db netscope.db
-python3 -m netscope.cli topology scan.json > site/topology.json
-python3 -m netscope.cli risk CVE-2025-0001 --cvss 9.8 --epss 0.9 --kev
-python3 -m netscope.cli cve CVE-2025-0001
+python3 -m pip install -e .
 ```
 
-The topology output contains `nodes` and `edges` in React Flow format. Edges are intentionally not invented when no verified relationship exists.
-
-## Vulnerability feeds
+Examples:
 
 ```bash
-python3 -m netscope.cli feeds update-kev
-python3 -m netscope.cli feeds update-epss
+netscope discover 192.168.1.0/24 --json
+netscope scan 192.168.1.10 --profile quick --json
+netscope services 10.0.0.10
+netscope os 10.0.0.10 --allow 10.0.0.0/24
 ```
 
-Feeds are cached under `.netscope/feeds`.
-
-## API and scheduling
-
-```bash
-python3 -m netscope.cli api --host 127.0.0.1 --port 8000 --db netscope.db
-python3 -m netscope.cli schedule add --target 192.168.1.0/24 --profile quick --every 60
-python3 -m netscope.cli schedule list
-python3 -m netscope.cli schedule daemon
-```
-
-API endpoints include `/api/health`, `/api/assets`, `/api/findings`, and `/api/topology`.
-
-## React frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## Docker
-
-```bash
-docker compose up --build
-```
+The host running NetScope must have Nmap installed and the appropriate privileges for the selected scan profile. No real scan is performed by the test suite.
 
 ## Tests
 
