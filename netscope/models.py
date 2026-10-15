@@ -26,6 +26,7 @@ class Host:
     os_accuracy: int | None = None
     os_evidence: list[str] = field(default_factory=list)
     services: list[Service] = field(default_factory=list)
+    trace_hops: list[str] = field(default_factory=list)
 
 
 @dataclass
