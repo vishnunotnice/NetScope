@@ -4,10 +4,6 @@ NetScope is an authorized network discovery, asset inventory, vulnerability inte
 
 Only scan systems and ranges for which you have explicit authorization. NetScope does not exploit systems or perform credential attacks.
 
-## NetScope website
-
-Visit the [NetScope website](http://netscope.vishnumoguluri.com/) for the project overview, product information, and additional resources.
-
 ## Phase 1 — Network Discovery and Core Scanning
 
 Implemented:
