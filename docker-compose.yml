@@ -1,0 +1,10 @@
+services:
+  netscope:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - netscope-data:/data
+    restart: unless-stopped
+volumes:
+  netscope-data:
