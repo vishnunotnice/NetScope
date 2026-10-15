@@ -47,9 +47,10 @@ class AssetStore:
     def _migrate(self):
         columns={row[1] for row in self.db.execute("PRAGMA table_info(assets)")}
         if "trace_hops" not in columns: self.db.execute("ALTER TABLE assets ADD COLUMN trace_hops TEXT NOT NULL DEFAULT '[]'")
+        if "services" not in columns: self.db.execute("ALTER TABLE assets ADD COLUMN services TEXT NOT NULL DEFAULT '[]'")
     def upsert_hosts(self,hosts:Iterable[Host]):
         now=datetime.now(timezone.utc).isoformat()
-        for h in hosts: self.db.execute("INSERT INTO assets(address,hostname,mac,vendor,status,os_name,os_accuracy,criticality,trace_hops,last_seen) VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(address) DO UPDATE SET hostname=excluded.hostname,mac=excluded.mac,vendor=excluded.vendor,status=excluded.status,os_name=excluded.os_name,os_accuracy=excluded.os_accuracy,trace_hops=excluded.trace_hops,last_seen=excluded.last_seen",(h.address,h.hostname,h.mac,h.vendor,h.status,h.os_name,h.os_accuracy,.5,json.dumps(h.trace_hops),now))
+        for h in hosts: self.db.execute("INSERT INTO assets(address,hostname,mac,vendor,status,os_name,os_accuracy,criticality,trace_hops,services,last_seen) VALUES(?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(address) DO UPDATE SET hostname=excluded.hostname,mac=excluded.mac,vendor=excluded.vendor,status=excluded.status,os_name=excluded.os_name,os_accuracy=excluded.os_accuracy,trace_hops=excluded.trace_hops,services=excluded.services,last_seen=excluded.last_seen",(h.address,h.hostname,h.mac,h.vendor,h.status,h.os_name,h.os_accuracy,.5,json.dumps(h.trace_hops),json.dumps([asdict(s) for s in h.services]),now))
         self.db.commit()
     def assets(self): return [dict(r) for r in self.db.execute("SELECT * FROM assets ORDER BY address")]
     def audit(self,action,target,details): self.db.execute("INSERT INTO audit_log(action,target,details,created_at) VALUES(?,?,?,?)",(action,target,json.dumps(details),datetime.now(timezone.utc).isoformat())); self.db.commit()
