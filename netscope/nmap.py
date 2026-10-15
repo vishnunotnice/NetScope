@@ -25,10 +25,10 @@ class NmapRunner:
     def __init__(self, executable: str = "nmap") -> None:
         self.executable = executable
 
-    def scan(self, target: str, profile: str = "quick") -> ScanResult:
+    def scan(self, target: str, profile: str = "quick", traceroute: bool = False) -> ScanResult:
         if profile not in PROFILES:
             raise ValueError(f"Unknown scan profile: {profile}")
-        command = [self.executable, *PROFILES[profile], "-oX", "-", target]
+        command = [self.executable, *PROFILES[profile]] + (["--traceroute"] if traceroute else []) + ["-oX", "-", target]
         completed = subprocess.run(command, capture_output=True, text=True, check=False)
         if completed.returncode != 0:
             message = completed.stderr.strip() or f"nmap exited with {completed.returncode}"
@@ -79,6 +79,7 @@ def parse_xml(xml: str, *, target: str, profile: str) -> ScanResult:
             host.os_name = osmatch.attrib.get("name")
             host.os_accuracy = int(osmatch.attrib["accuracy"]) if osmatch.attrib.get("accuracy", "").isdigit() else None
             host.os_evidence = [c.attrib.get("name", "") for c in node.findall("./os/osmatch/osclass")]
+        host.trace_hops = [h.attrib["ipaddr"] for h in node.findall("./trace/hop") if h.attrib.get("ipaddr")]
         hosts.append(host)
     return ScanResult(
         target=target,
